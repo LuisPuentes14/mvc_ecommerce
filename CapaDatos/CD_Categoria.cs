@@ -107,7 +107,7 @@ namespace CapaDatos
                 {
 
 
-                    SqlCommand cmd = new SqlCommand("sp_EditarUsuario", oconexion);
+                    SqlCommand cmd = new SqlCommand("sp_EditarCategorias", oconexion);
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.Parameters.AddWithValue("IdCategoria", obj.IdCategoria);
                     cmd.Parameters.AddWithValue("Descripcion", obj.Descripcion);            
@@ -133,7 +133,7 @@ namespace CapaDatos
             return resultado;
         }
 
-        public bool Eliminar(Categoria obj, out string Mensaje)
+        public bool Eliminar(int id, out string Mensaje)
         {
 
             bool resultado = false;
@@ -146,11 +146,9 @@ namespace CapaDatos
                 {
 
 
-                    SqlCommand cmd = new SqlCommand("sp_EditarUsuario", oconexion);
+                    SqlCommand cmd = new SqlCommand("sp_EliminarCategoria", oconexion);
                     cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.AddWithValue("IdCategoria", obj.IdCategoria);
-                    cmd.Parameters.AddWithValue("Descripcion", obj.Descripcion);
-                    cmd.Parameters.AddWithValue("Activo", obj.Activo);
+                    cmd.Parameters.AddWithValue("IdCategoria", id);                
                     cmd.Parameters.Add("Mensaje", SqlDbType.VarChar, 500).Direction = ParameterDirection.Output;
                     cmd.Parameters.Add("Resultado", SqlDbType.Int).Direction = ParameterDirection.Output;
 
