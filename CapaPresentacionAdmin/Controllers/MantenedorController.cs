@@ -26,7 +26,7 @@ namespace CapaPresentacionAdmin.Controllers
             return View();
         }
 
-
+        #region CATEGORIA
         public JsonResult ListarCategorias()
         {
 
@@ -68,7 +68,9 @@ namespace CapaPresentacionAdmin.Controllers
 
 
         }
+        #endregion
 
+        #region MARCA
         public JsonResult ListarMarcas()
         {
 
@@ -111,7 +113,7 @@ namespace CapaPresentacionAdmin.Controllers
 
         }
 
-
+        #endregion
 
 
     }
