@@ -1,7 +1,12 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using Microsoft.SqlServer.Server;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
@@ -115,6 +120,111 @@ namespace CapaPresentacionAdmin.Controllers
 
         #endregion
 
+        #region PRODUCTO
+
+        public JsonResult ListarProdcuto()
+        {
+
+            List<Producto> oLista = new List<Producto>();
+            oLista = new CN_Producto().Listar();
+
+            return Json(new { data = oLista }, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult GuardarProducto(string objeto, HttpPostedFileBase archivoImagen)
+        {
+
+            string mensaje = string.Empty;
+            bool operacion_exitosa = true;
+            bool guardar_imagen_exito = true;
+
+            Producto oProdcuto = new Producto();
+            oProdcuto = JsonConvert.DeserializeObject<Producto>(objeto);
+
+            decimal precio;
+
+            if (decimal.TryParse(oProdcuto.PrecioTexto, NumberStyles.AllowDecimalPoint, new CultureInfo("es-CO"), out precio))
+            {
+                oProdcuto.Precio = precio;
+
+            }
+            else
+            {
+
+                return Json(new { operacionExitosa = false, mensaje = "El formato del precio debe ser ##.##" }, JsonRequestBehavior.AllowGet);
+
+            }
+
+
+
+
+            if (oProdcuto.IdProducto == 0)
+            {
+                int idProductoGenerado = new CN_Producto().Registrar(oProdcuto, out mensaje);
+
+                if (idProductoGenerado != 0)
+                {
+                    oProdcuto.IdProducto = idProductoGenerado;
+                }
+                else
+                {
+                    operacion_exitosa = false;
+
+                }
+
+
+            }
+            else
+            {
+                operacion_exitosa = new CN_Producto().Editar(oProdcuto, out mensaje);
+            }
+
+            if (operacion_exitosa)
+            {
+                if (archivoImagen != null) {
+
+                    string ruta_guardar = ConfigurationManager.AppSettings["ServidorFotos"];
+                    string extencion = Path.GetExtension(archivoImagen.FileName);
+                    string nombre_imagen = string.Concat(oProdcuto.IdProducto.ToString(), extencion);
+
+                    try
+                    {
+
+                        archivoImagen.SaveAs(Path.Combine(ruta_guardar, nombre_imagen));
+
+                    }
+                    catch (Exception ex)
+                    {
+
+                        string msg = ex.Message;
+                        guardar_imagen_exito = false;
+                    }
+
+                    if (guardar_imagen_exito)
+                    {
+
+                        oProdcuto.RutaImagenes = ruta_guardar;
+                        oProdcuto.NombreImagenes = nombre_imagen;
+                        bool rspta = new CN_Producto().GuardarDatosImagen(oProdcuto, out mensaje);
+                    }
+                    else {
+                        mensaje = "Se guardo el producto pero hubo problemas con la imagen";
+                    }
+                    
+
+                
+                }
+
+            }
+
+
+            return Json(new { resultado = operacion_exitosa, idGenerado=oProdcuto.IdProducto, mensaje = mensaje }, JsonRequestBehavior.AllowGet);
+
+        }
+
+
+        #endregion
 
     }
 
